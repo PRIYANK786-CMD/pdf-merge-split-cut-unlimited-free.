@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Utility Hub By Mr. Priyank Panchal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PDF-lib for PDF manipulation -->
+    <script src="https://unpkg.com/pdf-lib@1.4.0/dist/pdf-lib.min.js"></script>
+    <!-- PDF.js for rendering previews -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Header -->
+    <header class="bg-indigo-600 text-white shadow-md py-6 px-8">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
+            <h1 class="text-2xl md:text-3xl font-bold tracking-tight">PDF Utility Hub</h1>
+            <p class="text-indigo-200 mt-1 md:mt-0 text-sm font-medium">By Mr. Priyank Panchal</p>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-5xl mx-auto px-4 py-8 w-full flex-grow">
+        
+        <!-- Navigation Tabs -->
+        <div class="flex border-b border-slate-200 mb-8">
+            <button onclick="switchTab('merge')" id="tab-merge" class="py-3 px-6 font-semibold text-indigo-600 border-b-2 border-indigo-600 focus:outline-none transition">Merge PDFs</button>
+            <button onclick="switchTab('split')" id="tab-split" class="py-3 px-6 font-semibold text-slate-500 hover:text-slate-700 focus:outline-none transition">Split PDF</button>
+            <button onclick="switchTab('cut')" id="tab-cut" class="py-3 px-6 font-semibold text-slate-500 hover:text-slate-700 focus:outline-none transition">Cut & Reorder Pages</button>
+        </div>
+
+        <!-- 1. MERGE SECTION -->
+        <section id="section-merge" class="space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <h2 class="text-xl font-bold text-slate-700 mb-4">Merge Multiple PDFs</h2>
+                <p class="text-sm text-slate-500 mb-4">Upload multiple PDF files to combine them sequentially into a single document.</p>
+                <input type="file" id="merge-files" multiple accept=".pdf" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border border-slate-200 rounded-lg p-2"/>
+                <button onclick="mergePDFs()" class="mt-6 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg shadow transition">Merge & Download PDF</button>
+            </div>
+        </section>
+
+        <!-- 2. SPLIT SECTION -->
+        <section id="section-split" class="space-y-6 hidden">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <h2 class="text-xl font-bold text-slate-700 mb-4">Split PDF into Individual Pages</h2>
+                <p class="text-sm text-slate-500 mb-4">Upload a PDF file to extract and download every page as a separate PDF file.</p>
+                <input type="file" id="split-file" accept=".pdf" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border border-slate-200 rounded-lg p-2"/>
+                <button onclick="splitPDF()" class="mt-6 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg shadow transition">Split & Download Pages</button>
+            </div>
+        </section>
+
+        <!-- 3. CUT & REORDER SECTION -->
+        <section id="section-cut" class="space-y-6 hidden">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <h2 class="text-xl font-bold text-slate-700 mb-4">Cut, Select & Reorder Pages</h2>
+                <p class="text-sm text-slate-500 mb-4">Upload a PDF, preview its pages, click pages to select/order them (e.g., 1, 2, 3 or custom sequences like A, B, C), and export.</p>
+                <input type="file" id="cut-file" accept=".pdf" onchange="loadPdfForCutting(event)" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border border-slate-200 rounded-lg p-2"/>
+                
+                <!-- Page Selector Grid Container -->
+                <div id="page-grid-container" class="mt-6 hidden">
+                    <h3 class="font-semibold text-slate-700 mb-2">Select and sequence pages (Click order determines final sequence):</h3>
+                    <div id="page-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4 max-h-96 overflow-y-auto p-2 border border-slate-200 rounded-lg bg-slate-50"></div>
+                    <div class="mt-4 flex justify-between items-center">
+                        <span id="sequence-counter" class="text-sm font-medium text-indigo-600">Selected Sequence: None</span>
+                        <button onclick="clearSelection()" class="text-sm text-red-600 hover:underline">Clear Selection</button>
+                    </div>
+                    <button onclick="exportCustomPDF()" class="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg shadow transition">Export Custom Sequence PDF</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-sm text-slate-500">
+        <p>&copy; 2026 PDF Utility Hub. Designed & Developed by <strong class="text-slate-700">Mr. Priyank Panchal</strong>.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
